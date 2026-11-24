@@ -16,12 +16,14 @@ Leyenda: `[x]` hecho · `[ ]` pendiente · `[/]` empezado · `[-]` descartado
 - [x] Formulario para añadir un remitente nuevo y elegir su sección
 - [x] Notificación en pantalla para códigos e importantes
 - [x] Script para arrancar con Windows
-- [ ] David crea las credenciales OAuth en Google Cloud (`credentials.json`)
-- [ ] David lo prueba con su Gmail real y ajusta las reglas de Moodle, Ilerna y Santander
+- [x] David crea las credenciales OAuth en Google Cloud (`credentials.json`)
+- [x] Rediseño visual: código destacado, reparto de la bandeja y remitentes ruidosos con «Mover a…»
+- [/] David lo prueba con su Gmail real y ajusta las reglas de Moodle, Ilerna y Santander
 
 ## Fase 2 · Importante
 - [ ] Resumen sin datos sensibles (contadores, último código no) para el Centro de Operaciones
 - [ ] Marcar como leído/archivar desde el dashboard
+- [ ] Sección propia «Empleo» (LinkedIn, InfoJobs, Indeed…): secciones personalizables
 - [ ] Ajustar la detección de cursos con los asuntos reales de Moodle e Ilerna
 
 ## Fase 3 · Extra
