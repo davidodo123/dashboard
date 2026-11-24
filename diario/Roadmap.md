@@ -23,6 +23,7 @@ Leyenda: `[x]` hecho · `[ ]` pendiente · `[/]` empezado · `[-]` descartado
 ## Fase 2 · Importante
 - [ ] Resumen sin datos sensibles (contadores, último código no) para el Centro de Operaciones
 - [ ] Marcar como leído/archivar desde el dashboard
+- [x] Sección «Amazon» con devoluciones, envíos y pedidos separados
 - [ ] Sección propia «Empleo» (LinkedIn, InfoJobs, Indeed…): secciones personalizables
 - [ ] Ajustar la detección de cursos con los asuntos reales de Moodle e Ilerna
 

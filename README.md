@@ -6,6 +6,7 @@ App local que lee tu Gmail (solo lectura), separa los correos por remitente y te
 - **Importante**: los remitentes que marques.
 - **Académico**: Moodle e Ilerna, filtrables por curso.
 - **Banco**: tickets de Santander con el importe y el total.
+- **Amazon**: aparte, separado en Devolución / Envío / Pedido / Publicidad, con las devoluciones primero.
 - **Otros**: spam y sin clasificar. «Clasificar» manda el remitente a su sección.
 
 Los correos, el token de Google y tus reglas se guardan solo en `data/`, que no se sube a git.
@@ -33,6 +34,7 @@ Se editan desde el dashboard (sección Remitentes) o en `data/reglas.json`. La p
 
 - `de` y `asunto`: texto que debe contener el remitente o el asunto (sin distinguir mayúsculas ni tildes).
 - `subcategoriaRegex`: saca el curso del asunto (primer grupo).
+- `subcategorias`: lista de `{ "nombre", "palabras" }`; gana la primera cuyas palabras salen en el asunto (así se separan las devoluciones de Amazon).
 - `notificar`: notificación en pantalla. Los códigos y la sección Importante avisan siempre.
 
 ## Variables opcionales

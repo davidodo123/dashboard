@@ -11,6 +11,7 @@ const SECCION = {
   'Importante': { var: '--s-importante', destino: '#sec-importante' },
   'Académico': { var: '--s-academico', destino: '#sec-academico' },
   'Banco': { var: '--s-banco', destino: '#sec-banco' },
+  'Amazon': { var: '--s-amazon', destino: '#sec-amazon' },
   'Otros': { var: '--s-otros', destino: '#sec-otros' },
 };
 const CODIGO_FRESCO_MIN = 15;
@@ -106,7 +107,7 @@ function itemCorreo(c, extra) {
     h('span', { class: 'de', title: c.de }, remitente(c.de)),
     extra || h('span', { class: 'hora' }, hora(c.fecha)),
     h('span', { class: 'asunto', title: c.asunto }, c.asunto),
-    c.resumen ? h('span', { class: 'resumen-correo' }, c.resumen) : null,
+    c.resumen && !c.resumen.startsWith(c.asunto.replace(/[.…\s]+$/, '')) ? h('span', { class: 'resumen-correo' }, c.resumen) : null,
   );
 }
 
@@ -200,6 +201,33 @@ function pintarBanco(banco) {
     'Sin tickets de Santander en 3 días.');
 }
 
+const ORDEN_AMAZON = ['Devolución', 'Envío', 'Pedido', 'Publicidad'];
+let filtroAmazon = 'Todo';
+
+function pintarAmazon(amazon) {
+  const tipo = (c) => c.subcategoria || 'Publicidad';
+  const cuenta = (t) => amazon.filter((c) => tipo(c) === t).length;
+  const devoluciones = cuenta('Devolución');
+  $('#resumen-amazon').textContent = amazon.length
+    ? `${devoluciones} devolución${devoluciones === 1 ? '' : 'es'} · ${cuenta('Envío')} envío${cuenta('Envío') === 1 ? '' : 's'}`
+    : '';
+
+  const tipos = ['Todo', ...ORDEN_AMAZON.filter((t) => cuenta(t))];
+  if (!tipos.includes(filtroAmazon)) filtroAmazon = 'Todo';
+  $('#filtros-amazon').replaceChildren(...(amazon.length ? tipos : []).map((t) =>
+    h('button', { class: 'chip', role: 'tab', type: 'button', 'aria-selected': String(t === filtroAmazon),
+      onclick: () => { filtroAmazon = t; pintar(); } },
+      t, h('span', { class: 'n' }, t === 'Todo' ? amazon.length : cuenta(t)))));
+
+  // Devoluciones primero; dentro de cada tipo, lo más reciente arriba.
+  const rango = (c) => { const i = ORDEN_AMAZON.indexOf(tipo(c)); return i < 0 ? 99 : i; };
+  const visibles = (filtroAmazon === 'Todo' ? [...amazon] : amazon.filter((c) => tipo(c) === filtroAmazon))
+    .sort((a, b) => rango(a) - rango(b) || b.fecha - a.fecha);
+  lista($('#amazon'), visibles.slice(0, 30).map((c) =>
+    itemCorreo(c, h('span', { class: 'etiqueta' }, tipo(c)))),
+    'Nada de Amazon en 3 días.');
+}
+
 function pintarRuido(otros) {
   $('#n-otros').textContent = otros.length;
   const grupos = new Map();
@@ -259,6 +287,7 @@ function pintar() {
     'Nada importante. Marca remitentes como Importante desde «Quién te llena la bandeja».');
   pintarAcademico(por['Académico']);
   pintarBanco(por['Banco']);
+  pintarAmazon(por['Amazon']);
   pintarRuido(por['Otros']);
   pintarReglas();
 }

@@ -58,6 +58,20 @@ test('Santander va a Banco con importe', () => {
   assert.equal(r.importe, '23,40 €');
 });
 
+test('Amazon va aparte con subcategoría por asunto', () => {
+  const de = 'Amazon.es <devolucion@amazon.es>';
+  assert.deepEqual(
+    ['Tu devolución de BDM Reloj', 'Enviado: "L\'Oréal Elvive"', 'En reparto: “BDM - Reloj”', 'Tu pedido de Amazon.es', 'Hemos encontrado algo que podría gustarte']
+      .map((asunto) => clasificar({ de, asunto, texto: '' }, reglas)).map((r) => `${r.seccion}/${r.subcategoria}`),
+    ['Amazon/Devolución', 'Amazon/Envío', 'Amazon/Envío', 'Amazon/Pedido', 'Amazon/Publicidad'],
+  );
+});
+
+test('un código real de Amazon sigue yendo a Códigos', () => {
+  const r = clasificar({ de: 'Amazon <account-update@amazon.es>', asunto: 'Verificación de cuenta', texto: 'Tu código de verificación es 482913' }, reglas);
+  assert.equal(r.seccion, 'Códigos');
+});
+
 test('sin regla va a Otros y no notifica', () => {
   const r = clasificar({ de: 'ofertas@tienda.com', asunto: '50% descuento', texto: '' }, reglas);
   assert.equal(r.seccion, 'Otros');

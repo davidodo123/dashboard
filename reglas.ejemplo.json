@@ -2,6 +2,16 @@
   "reglas": [
     { "de": "moodle", "seccion": "Académico", "subcategoriaRegex": "^\\[?([^\\]:\\-–]+)", "subcategoria": "Moodle" },
     { "de": "ilerna", "seccion": "Académico", "subcategoria": "Ilerna" },
-    { "de": "santander", "seccion": "Banco", "subcategoria": "Santander" }
+    { "de": "santander", "seccion": "Banco", "subcategoria": "Santander" },
+    {
+      "de": "amazon.",
+      "seccion": "Amazon",
+      "subcategorias": [
+        { "nombre": "Devolución", "palabras": ["devolución", "reembolso", "return", "refund"] },
+        { "nombre": "Envío", "palabras": ["enviado", "entregado", "en reparto", "llega", "entrega", "shipped", "delivered"] },
+        { "nombre": "Pedido", "palabras": ["pedido", "order", "compra"] }
+      ],
+      "subcategoria": "Publicidad"
+    }
   ]
 }

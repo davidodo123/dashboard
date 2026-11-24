@@ -1,6 +1,6 @@
 // Clasificación de correos: detección de códigos + reglas por remitente/asunto.
 
-export const SECCIONES = ['Códigos', 'Importante', 'Académico', 'Banco', 'Otros'];
+export const SECCIONES = ['Códigos', 'Importante', 'Académico', 'Banco', 'Amazon', 'Otros'];
 
 // Palabras completas: "Passcode" o "shopping" no cuentan.
 const PALABRAS_CODIGO =
@@ -70,6 +70,11 @@ function coincide(regla, correo) {
 }
 
 function subcategoria(regla, correo) {
+  // Lista de { nombre, palabras }: la primera cuyas palabras aparezcan en el asunto.
+  if (Array.isArray(regla.subcategorias)) {
+    const s = regla.subcategorias.find((x) => (x.palabras || []).some((p) => contiene(correo.asunto, p)));
+    if (s) return s.nombre;
+  }
   if (regla.subcategoriaRegex) {
     try {
       const m = new RegExp(regla.subcategoriaRegex, 'i').exec(correo.asunto || '');
