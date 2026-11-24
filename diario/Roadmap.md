@@ -15,7 +15,7 @@ Leyenda: `[x]` hecho · `[ ]` pendiente · `[/]` empezado · `[-]` descartado
 - [x] Dashboard local resumido con secciones y botón de copiar código
 - [x] Formulario para añadir un remitente nuevo y elegir su sección
 - [x] Notificación en pantalla para códigos e importantes
-- [x] Script para arrancar con Windows
+- [x] Arranque con Windows instalado (sale en Aplicaciones de arranque)
 - [x] David crea las credenciales OAuth en Google Cloud (`credentials.json`)
 - [x] Rediseño visual: código destacado, reparto de la bandeja y remitentes ruidosos con «Mover a…»
 - [/] David lo prueba con su Gmail real y ajusta las reglas de Moodle, Ilerna y Santander

@@ -13,4 +13,4 @@ tags: [configuracion]
 - Puerto: `4321` (variable `PUERTO`, opcional).
 - Intervalo de lectura: 60 s (variable `INTERVALO_SEGUNDOS`, opcional).
 - Datos privados en `data/`: `token.json`, `correos.json`, `reglas.json`.
-- Arranque con Windows: `npm run inicio:instalar` crea `dashboard-correo.vbs` en la carpeta Inicio del usuario.
+- Arranque con Windows: `npm run inicio:instalar` crea el acceso directo «Dashboard de correo» en la carpeta Inicio del usuario (`shell:startup`), que lanza `data/arrancar.vbs` sin ventana. Sale en Aplicaciones de arranque de Windows.

@@ -20,7 +20,7 @@ Los correos, el token de Google y tus reglas se guardan solo en `data/`, que no 
    3. En **Credenciales**, crea un **ID de cliente OAuth** de tipo **Aplicación de escritorio**.
    4. Descarga el JSON y guárdalo como `credentials.json` en esta carpeta.
 3. `npm start` y abre http://127.0.0.1:4321, luego pulsa **Conectar Gmail**.
-4. Arranque con Windows: `npm run inicio:instalar` (para quitarlo: `npm run inicio:quitar`).
+4. Arranque con Windows: `npm run inicio:instalar`. Crea el acceso directo **Dashboard de correo** en la carpeta Inicio, que aparece en *Configuración > Aplicaciones > Inicio* y en el *Administrador de tareas > Aplicaciones de arranque* (ahí se activa o desactiva). Para quitarlo: `npm run inicio:quitar`.
 
 ## Reglas
 
