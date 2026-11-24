@@ -2,8 +2,14 @@
 
 export const SECCIONES = ['Códigos', 'Importante', 'Académico', 'Banco', 'Otros'];
 
+// Palabras completas: "Passcode" o "shopping" no cuentan.
 const PALABRAS_CODIGO =
-  /(c[oó]digo|code|verificaci[oó]n|verification|verify|verifica|one[- ]time|otp|2fa|pin|contrase[nñ]a temporal|security code|inicio de sesi[oó]n|login)/i;
+  /(?<![\p{L}\p{N}])(c[oó]digo|code|verificaci[oó]n|verification|verify|verifica|one[- ]time|otp|2fa|pin|contrase[nñ]a temporal|security code|inicio de sesi[oó]n|login)(?![\p{L}\p{N}])/giu;
+
+// "Código de devolución", "promo code"… no son códigos de verificación.
+const NO_ES_VERIFICACION =
+  /^\s*(de\s+)?(devoluci[oó]n|seguimiento|pedido|postal|promocional|descuento|regalo|cup[oó]n|env[ií]o|cliente|referencia|reserva|tracking|discount|promo)/i;
+const ANTES_NO_VERIFICACION = /(promo|discount|tracking|gift|postal|zip)\s*$/i;
 
 const CODIGO = /\b([A-Z]{1,3}-)?(\d{4,8})\b/g;
 
@@ -16,18 +22,36 @@ function contiene(texto, aguja) {
 }
 
 /** Busca un código de verificación cerca de una palabra clave. Devuelve el código o null. */
+// Ofertas: un "código" junto a un descuento es promocional.
+const PUBLICIDAD = /descuento|discount|cup[oó]n|coupon|rebaja|oferta|\d\s?%|% ?off|env[ií]o gratis|free shipping/i;
+
+// Sin enlaces ni entidades HTML: sus números no son códigos.
+const sinEnlaces = (t) => (t || '')
+  .replace(/\(?\s*https?:\/\/[^\s)]+\)?/gi, ' ')
+  .replace(/&#?\w+;/g, ' ');
+
+function candidatos(v) {
+  return [...v.matchAll(CODIGO)]
+    .filter((x) => {
+      // Descarta trozos de grupos de números ("950 8341 2248", teléfonos, IDs de reunión).
+      const antes = v.slice(Math.max(0, x.index - 2), x.index);
+      const despues = v.slice(x.index + x[0].length, x.index + x[0].length + 2);
+      return !/\d[\s.-]?$/.test(antes) && !/^[\s.-]?\d/.test(despues);
+    })
+    .map((x) => (x[1] || '') + x[2])
+    .filter((c) => !/^(19|20)\d{2}$/.test(c)); // descarta años
+}
+
 export function extraerCodigo(asunto, texto) {
-  const todo = `${asunto || ''}\n${texto || ''}`;
-  const m = PALABRAS_CODIGO.exec(todo);
-  if (!m) return null;
-  // Ventana alrededor de la palabra clave; si no hay nada ahí, el asunto entero.
-  const ini = Math.max(0, m.index - 150);
-  const ventanas = [todo.slice(ini, m.index + 300), asunto || ''];
-  for (const v of ventanas) {
-    const candidatos = [...v.matchAll(CODIGO)]
-      .map((x) => (x[1] || '') + x[2])
-      .filter((c) => !/^(19|20)\d{2}$/.test(c)); // descarta años
-    if (candidatos.length) return candidatos[0];
+  const todo = `${sinEnlaces(asunto)}\n${sinEnlaces(texto)}`;
+  for (const m of todo.matchAll(PALABRAS_CODIGO)) {
+    const fin = m.index + m[0].length;
+    if (NO_ES_VERIFICACION.test(todo.slice(fin, fin + 30))) continue;
+    if (ANTES_NO_VERIFICACION.test(todo.slice(Math.max(0, m.index - 12), m.index))) continue;
+    if (PUBLICIDAD.test(todo.slice(Math.max(0, m.index - 120), fin + 120))) continue;
+    // Ventana alrededor de la palabra clave.
+    const c = candidatos(todo.slice(Math.max(0, m.index - 150), fin + 300));
+    if (c.length) return c[0];
   }
   return null;
 }
