@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard de correo</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232f6df6'/%3E%3Cpath d='M7 10h18v12H7z' fill='none' stroke='white' stroke-width='2'/%3E%3Cpath d='M7 10l9 7 9-7' fill='none' stroke='white' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/estilos.css">
+</head>
+<body>
+<header class="barra">
+  <div class="marca">
+    <h1>Correo</h1>
+    <span id="estado" class="estado" aria-live="polite"></span>
+  </div>
+  <div class="acciones">
+    <button id="refrescar" class="boton">Actualizar</button>
+  </div>
+</header>
+
+<main id="app">
+  <section id="configurar" class="aviso" hidden></section>
+
+  <section id="panel" hidden>
+    <div class="resumen" id="resumen"></div>
+
+    <section class="bloque" aria-labelledby="t-codigos">
+      <h2 id="t-codigos">Códigos</h2>
+      <div id="codigos" class="codigos"></div>
+    </section>
+
+    <div class="rejilla">
+      <section class="bloque" aria-labelledby="t-importante">
+        <h2 id="t-importante">Importante</h2>
+        <ul id="importante" class="lista"></ul>
+      </section>
+
+      <section class="bloque" aria-labelledby="t-academico">
+        <div class="cabecera">
+          <h2 id="t-academico">Académico</h2>
+          <div id="cursos" class="chips" role="tablist" aria-label="Cursos"></div>
+        </div>
+        <ul id="academico" class="lista"></ul>
+      </section>
+
+      <section class="bloque" aria-labelledby="t-banco">
+        <div class="cabecera">
+          <h2 id="t-banco">Banco</h2>
+          <span id="total-banco" class="total"></span>
+        </div>
+        <ul id="banco" class="lista"></ul>
+      </section>
+    </div>
+
+    <details class="bloque otros">
+      <summary><h2>Otros <span id="n-otros" class="contador"></span></h2><span class="pista">Spam y sin clasificar. Usa «Clasificar» para enviar un remitente a su sección.</span></summary>
+      <ul id="otros" class="lista"></ul>
+    </details>
+
+    <section class="bloque" aria-labelledby="t-reglas">
+      <h2 id="t-reglas">Remitentes</h2>
+      <form id="form-regla" class="formulario">
+        <label>Remitente contiene
+          <input name="de" placeholder="moodle, santander.es, nombre@…" autocomplete="off">
+        </label>
+        <label>Asunto contiene
+          <input name="asunto" placeholder="Opcional: Factura, DAW M06…" autocomplete="off">
+        </label>
+        <label>Sección
+          <select name="seccion" required></select>
+        </label>
+        <label>Curso o subcategoría
+          <input name="subcategoria" placeholder="Opcional: Ilerna, DAW M06…" autocomplete="off">
+        </label>
+        <label class="check"><input type="checkbox" name="notificar"> Avisar en pantalla</label>
+        <button class="boton primario" type="submit">Añadir</button>
+        <p id="error-regla" class="error" role="alert"></p>
+      </form>
+      <ul id="reglas" class="reglas"></ul>
+    </section>
+  </section>
+</main>
+
+<script type="module" src="/app.js"></script>
+</body>
+</html>

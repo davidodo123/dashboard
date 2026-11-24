@@ -1,0 +1,6 @@
+/diario/.obsidian/workspace*.json
+/diario/.obsidian/cache
+node_modules/
+# Datos privados: correos, token de Google, credenciales y reglas con remitentes
+/data/
+credentials.json

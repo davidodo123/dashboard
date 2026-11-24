@@ -1,0 +1,17 @@
+{
+  "name": "dashboard-correo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Dashboard local que clasifica el Gmail por remitente y avisa de códigos e importantes",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node src/servidor.js",
+    "test": "node --test test/*.test.js",
+    "inicio:instalar": "node scripts/inicio-windows.js instalar",
+    "inicio:quitar": "node scripts/inicio-windows.js quitar"
+  },
+  "dependencies": {
+    "node-notifier": "^10.0.1"
+  }
+}

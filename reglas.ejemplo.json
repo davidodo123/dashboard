@@ -1,0 +1,7 @@
+{
+  "reglas": [
+    { "de": "moodle", "seccion": "Académico", "subcategoriaRegex": "^\\[?([^\\]:\\-–]+)", "subcategoria": "Moodle" },
+    { "de": "ilerna", "seccion": "Académico", "subcategoria": "Ilerna" },
+    { "de": "santander", "seccion": "Banco", "subcategoria": "Santander" }
+  ]
+}
