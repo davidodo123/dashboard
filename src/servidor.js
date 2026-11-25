@@ -1,4 +1,4 @@
-// Dashboard de correo: servidor local + lectura periódica de Gmail.
+// Centro en vivo: servidor local con correo, actividad, proyectos, estado del PC, buzón y calendario.
 import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -6,6 +6,11 @@ import { clasificar, SECCIONES } from './clasificar.js';
 import * as almacen from './almacen.js';
 import * as gmail from './gmail.js';
 import * as notificar from './notificar.js';
+import * as sistema from './sistema.js';
+import * as actividad from './actividad.js';
+import * as proyectos from './proyectos.js';
+import * as buzon from './buzon.js';
+import * as calendario from './calendario.js';
 
 const PUERTO = Number(process.env.PUERTO) || 4321;
 const INTERVALO = (Number(process.env.INTERVALO_SEGUNDOS) || 60) * 1000;
@@ -113,6 +118,7 @@ const servidor = http.createServer(async (req, res) => {
     if (url.pathname === '/oauth') {
       await gmail.canjearCodigo(url.searchParams.get('code'), url.searchParams.get('state'), REDIRECT);
       leerGmail();
+      calendario.refrescar();
       res.writeHead(302, { location: '/' });
       return res.end();
     }
@@ -124,6 +130,24 @@ const servidor = http.createServer(async (req, res) => {
         correos: correos.map(({ texto, ...c }) => c), // el cuerpo completo no hace falta en la UI
         ultimaLectura,
         ultimoError,
+      });
+    }
+    if (url.pathname === '/api/vivo' && req.method === 'GET') {
+      const s = sistema.estado();
+      return json(res, 200, { ...s, historia: s.historia.slice(-90), actividad: actividad.estado().ahora });
+    }
+    if (url.pathname === '/api/centro' && req.method === 'GET') {
+      const codigos = correos.filter((c) => c.seccion === 'Códigos').slice(0, 3).map(({ texto, ...c }) => c);
+      const porSeccion = Object.fromEntries(SECCIONES.map((s) => [s, correos.filter((c) => c.seccion === s).length]));
+      return json(res, 200, {
+        sistema: sistema.estado(),
+        actividad: actividad.estado(),
+        semana: await actividad.semana(),
+        proyectos: proyectos.estado(),
+        buzon: buzon.estado(),
+        calendario: calendario.estado(),
+        correo: { auth: await gmail.estadoAuth(), porSeccion, codigos, ultimaLectura, ultimoError,
+          amazon: correos.filter((c) => c.seccion === 'Amazon' && c.subcategoria === 'Devolución').length },
       });
     }
     if (url.pathname === '/api/refrescar' && req.method === 'POST') {
@@ -160,6 +184,9 @@ reglas = await almacen.cargarReglas();
 correos = await almacen.cargarCorreos();
 reclasificar();
 notificar.configurar(BASE);
+await actividad.iniciar();
+sistema.alMuestrear(actividad.muestra);
+proyectos.alDescubrir(actividad.fijarProyectos);
 
 servidor.on('error', (e) => {
   if (e.code === 'EADDRINUSE') {
@@ -172,4 +199,8 @@ servidor.listen(PUERTO, '127.0.0.1', () => {
   console.log(`Dashboard de correo en ${BASE}`);
   leerGmail();
   setInterval(leerGmail, INTERVALO);
+  sistema.iniciar();
+  proyectos.iniciar();
+  buzon.iniciar();
+  calendario.iniciar();
 });

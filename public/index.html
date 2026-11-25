@@ -3,9 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Dashboard de correo</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232a78d6'/%3E%3Cpath d='M7 10h18v12H7z' fill='none' stroke='white' stroke-width='2'/%3E%3Cpath d='M7 10l9 7 9-7' fill='none' stroke='white' stroke-width='2'/%3E%3C/svg%3E">
+<title>Centro en vivo</title>
+<link rel="icon" href="/icono.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/estilos.css">
+<link rel="stylesheet" href="/centro.css">
 <script>
   // Tema guardado antes de pintar, para no parpadear.
   try { const t = localStorage.getItem('tema'); if (t) document.documentElement.dataset.theme = t; } catch {}
@@ -14,10 +15,16 @@
 <body>
 <header class="barra">
   <div class="marca">
-    <h1>Correo</h1>
-    <span id="estado" class="estado" aria-live="polite"></span>
+    <h1>Centro</h1>
+    <nav class="pestanas" aria-label="Secciones">
+      <a href="#hoy" data-ir="hoy">Hoy</a>
+      <a href="#correo" data-ir="correo">Correo</a>
+      <a href="#proyectos" data-ir="proyectos">Proyectos</a>
+      <a href="#pc" data-ir="pc">PC</a>
+    </nav>
   </div>
   <div class="acciones">
+    <span id="estado" class="estado" aria-live="polite"></span>
     <button id="tema" class="boton icono" type="button" aria-label="Cambiar tema claro u oscuro" title="Tema">
       <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2a8 8 0 1 0 0 16z" fill="currentColor"/><circle cx="10" cy="10" r="7.25" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
     </button>
@@ -26,6 +33,81 @@
 </header>
 
 <main id="app">
+  <!-- ============ HOY ============ -->
+  <section class="vista" data-vista="hoy" aria-label="Hoy">
+    <div class="fila-3">
+      <section class="tarjeta" aria-labelledby="t-ahora">
+        <h2 id="t-ahora" class="titulo">Ahora</h2>
+        <div id="ahora-app" class="ahora-app"></div>
+        <div id="ahora-pc" class="mini-metricas"></div>
+      </section>
+      <section class="tarjeta" aria-labelledby="t-hoy-tiempo">
+        <h2 id="t-hoy-tiempo" class="titulo">Tiempo delante del PC hoy</h2>
+        <p id="hoy-total" class="cifra-grande"></p>
+        <div id="hoy-barra" class="barra-apilada" role="img"></div>
+        <ul id="hoy-leyenda" class="leyenda"></ul>
+      </section>
+      <section class="tarjeta" aria-labelledby="t-agenda">
+        <h2 id="t-agenda" class="titulo">Agenda</h2>
+        <div id="agenda"></div>
+      </section>
+    </div>
+
+    <section class="tarjeta" aria-labelledby="t-dia">
+      <div class="cabecera">
+        <h2 id="t-dia" class="titulo">En qué se te ha ido el día</h2>
+        <span class="pista">Cada franja es tiempo activo con esa categoría delante. Los huecos son pausas de más de 2 min.</span>
+      </div>
+      <div id="linea-dia" class="linea-dia"></div>
+      <ul id="apps-hoy" class="apps-hoy"></ul>
+    </section>
+
+    <div class="fila-2">
+      <section class="tarjeta" aria-labelledby="t-proy-hoy">
+        <div class="cabecera">
+          <h2 id="t-proy-hoy" class="titulo">Proyectos</h2>
+          <a class="enlace" href="#proyectos">Ver todos</a>
+        </div>
+        <ul id="proyectos-hoy" class="proyectos-lista"></ul>
+      </section>
+      <section class="tarjeta" aria-labelledby="t-pendiente">
+        <h2 id="t-pendiente" class="titulo">Pendiente</h2>
+        <ul id="pendiente" class="pendiente"></ul>
+      </section>
+    </div>
+
+    <section class="tarjeta" aria-labelledby="t-semana">
+      <h2 id="t-semana" class="titulo">Últimos 7 días, horas activas por categoría</h2>
+      <div id="semana" class="semana"></div>
+      <ul id="semana-leyenda" class="leyenda"></ul>
+    </section>
+  </section>
+
+  <!-- ============ PROYECTOS ============ -->
+  <section class="vista" data-vista="proyectos" aria-label="Proyectos" hidden>
+    <p id="proyectos-resumen" class="frase"></p>
+    <div id="proyectos-tarjetas" class="proyectos-tarjetas"></div>
+  </section>
+
+  <!-- ============ PC ============ -->
+  <section class="vista" data-vista="pc" aria-label="Estado del PC" hidden>
+    <div class="fila-3">
+      <section class="tarjeta" aria-labelledby="t-cpu"><h2 id="t-cpu" class="titulo">CPU, últimos 3 min</h2><p id="cpu-ahora" class="cifra-grande"></p><div id="graf-cpu" class="grafica"></div></section>
+      <section class="tarjeta" aria-labelledby="t-ram"><h2 id="t-ram" class="titulo">Memoria, últimos 3 min</h2><p id="ram-ahora" class="cifra-grande"></p><div id="graf-ram" class="grafica"></div></section>
+      <section class="tarjeta" aria-labelledby="t-red"><h2 id="t-red" class="titulo">Red, últimos 3 min</h2><p id="red-ahora" class="cifra-grande"></p><div id="graf-red" class="grafica"></div><ul id="red-leyenda" class="leyenda"></ul></section>
+    </div>
+    <div class="fila-2">
+      <section class="tarjeta" aria-labelledby="t-procesos"><h2 id="t-procesos" class="titulo">Lo que más CPU gasta ahora</h2><table id="tabla-cpu" class="tabla"></table></section>
+      <section class="tarjeta" aria-labelledby="t-memoria"><h2 id="t-memoria" class="titulo">Lo que más memoria ocupa</h2><table id="tabla-ram" class="tabla"></table></section>
+    </div>
+    <div class="fila-2">
+      <section class="tarjeta" aria-labelledby="t-discos"><h2 id="t-discos" class="titulo">Discos</h2><ul id="discos" class="discos"></ul></section>
+      <section class="tarjeta" aria-labelledby="t-equipo"><h2 id="t-equipo" class="titulo">Equipo</h2><dl id="equipo" class="equipo"></dl></section>
+    </div>
+  </section>
+
+  <!-- ============ CORREO ============ -->
+  <section class="vista" data-vista="correo" aria-label="Correo" hidden>
   <section id="configurar" class="aviso" hidden></section>
 
   <div id="panel" hidden>
@@ -110,9 +192,11 @@
       <ul id="reglas" class="reglas"></ul>
     </section>
   </div>
+  </section>
 </main>
 
 <div id="tooltip" class="tooltip" role="tooltip" hidden></div>
 <script type="module" src="/app.js"></script>
+<script type="module" src="/centro.js"></script>
 </body>
 </html>

@@ -1,33 +1,49 @@
-# Dashboard de correo
+# Centro en vivo
 
-App local que lee tu Gmail (solo lectura), separa los correos por remitente y te avisa en pantalla de lo importante.
+Centro de control local de lo que hago en mi PC. Se abre solo al encender, en una ventana propia, y se actualiza cada pocos segundos. Convive con el panel diario del [Centro de Operaciones](https://github.com/davidodo123/centro-operaciones): aquí está todo en vivo, incluido lo privado, y nada sale del PC.
 
-- **Códigos**: códigos de verificación detectados en cualquier correo, con botón de copiar.
-- **Importante**: los remitentes que marques.
-- **Académico**: Moodle e Ilerna, filtrables por curso.
-- **Banco**: tickets de Santander con el importe y el total.
-- **Amazon**: aparte, separado en Devolución / Envío / Pedido / Publicidad, con las devoluciones primero.
-- **Otros**: spam y sin clasificar. «Clasificar» manda el remitente a su sección.
+| Pestaña | Qué enseña |
+|---|---|
+| **Hoy** | La app que tienes delante, CPU/RAM/red en directo, tiempo activo por categoría, la línea del día, proyectos movidos hoy, lo pendiente (códigos, devoluciones, commits sin subir, buzón) y la agenda |
+| **Correo** | Gmail clasificado: códigos de verificación, Importante, Académico (por curso), Banco, Amazon (devoluciones, envíos, pedidos) y quién te llena la bandeja |
+| **Proyectos** | Cada repo local con `diario/Roadmap.md`: progreso, fase, siguiente tarea, commits, horas y tokens de Claude Code de hoy, cambios sin subir |
+| **PC** | Gráficas de CPU, memoria y red de los últimos 3 min, procesos que más gastan, discos y equipo |
 
-Los correos, el token de Google y tus reglas se guardan solo en `data/`, que no se sube a git.
+## Privacidad
+
+- La actividad guarda solo el **nombre de la app** y, en VS Code, el **proyecto** sacado del título. Los títulos de ventana no se guardan.
+- Si no tocas el teclado ni el ratón en 2 minutos, no cuenta.
+- Correos, actividad, token de Google y reglas viven en `data/`, que no se sube a git. El buzón se lee de `~/buzon` y no se copia a ningún sitio.
+- El servidor solo escucha en `127.0.0.1` y rechaza peticiones de otras webs.
 
 ## Puesta en marcha
 
 1. `npm install`
-2. Credenciales de Google:
-   1. En [console.cloud.google.com](https://console.cloud.google.com) crea un proyecto y activa la **Gmail API**.
+2. Credenciales de Google (Gmail y Calendar, solo lectura):
+   1. En [console.cloud.google.com](https://console.cloud.google.com) crea un proyecto y activa la **Gmail API** y la **Google Calendar API**.
    2. En **Pantalla de consentimiento OAuth** elige *Externo*, déjala en *Prueba* y añade tu Gmail como usuario de prueba.
-   3. En **Credenciales**, crea un **ID de cliente OAuth** de tipo **Aplicación de escritorio**.
+   3. En **Clientes**, crea un **ID de cliente OAuth** de tipo **App de escritorio**.
    4. Descarga el JSON y guárdalo como `credentials.json` en esta carpeta.
-3. `npm start` y abre http://127.0.0.1:4321, luego pulsa **Conectar Gmail**.
-4. Arranque con Windows: `npm run inicio:instalar`. Crea el acceso directo **Dashboard de correo** en la carpeta Inicio, que aparece en *Configuración > Aplicaciones > Inicio* y en el *Administrador de tareas > Aplicaciones de arranque* (ahí se activa o desactiva). Para quitarlo: `npm run inicio:quitar`.
+3. `npm run inicio:instalar`. Crea:
+   - **Centro en vivo** en la carpeta Inicio: se abre al encender y sale en *Configuración > Aplicaciones > Inicio* (ahí se desactiva).
+   - **Centro** en el escritorio.
+4. Abre el centro y pulsa **Conectar Gmail** en la pestaña Correo (y **Conectar Google Calendar** en Hoy si ya conectaste antes solo Gmail).
 
-## Reglas
+Para quitar los accesos directos: `npm run inicio:quitar`. A mano también se puede arrancar con `npm start` y abrir http://127.0.0.1:4321.
 
-Se editan desde el dashboard (sección Remitentes) o en `data/reglas.json`. La primera que coincide gana; las nuevas van arriba.
+## Cómo funciona
+
+- `scripts/sonda.ps1`: un único PowerShell sin ventana que cada 2 s dice qué app está delante, cuánto llevas sin tocar el PC, procesos y red.
+- `src/actividad.js`: suma tiempo por app, por categoría (Programar, Navegar, Juegos, Multimedia, Otros) y por proyecto; un archivo por día en `data/actividad/`.
+- `src/proyectos.js`: repos locales con `diario/Roadmap.md`. Horas y progreso con las mismas fórmulas que el Centro de Operaciones; tokens de hoy leídos de `~/.claude/projects`.
+- `src/sistema.js`, `src/buzon.js`, `src/calendario.js`, `src/gmail.js`, `src/clasificar.js`: el resto de módulos.
+
+## Reglas del correo
+
+Se editan desde la pestaña Correo (sección Reglas) o en `data/reglas.json`. La primera que coincide gana; las nuevas van arriba.
 
 ```json
-{ "de": "moodle", "seccion": "Académico", "subcategoriaRegex": "^\[?([^\]:\-–]+)" }
+{ "de": "moodle", "seccion": "Académico", "subcategoriaRegex": "^\\[?([^\\]:\\-–]+)" }
 { "de": "santander", "seccion": "Banco" }
 { "de": "jefe@empresa.com", "seccion": "Importante", "notificar": true }
 ```
@@ -42,7 +58,7 @@ Se editan desde el dashboard (sección Remitentes) o en `data/reglas.json`. La p
 | Variable | Por defecto |
 |---|---|
 | `PUERTO` | `4321` |
-| `INTERVALO_SEGUNDOS` | `60` |
+| `INTERVALO_SEGUNDOS` | `60` (lectura de Gmail) |
 
 ## Tests
 

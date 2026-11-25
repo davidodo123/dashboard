@@ -20,13 +20,24 @@ Leyenda: `[x]` hecho · `[ ]` pendiente · `[/]` empezado · `[-]` descartado
 - [x] Rediseño visual: código destacado, reparto de la bandeja y remitentes ruidosos con «Mover a…»
 - [/] David lo prueba con su Gmail real y ajusta las reglas de Moodle, Ilerna y Santander
 
-## Fase 2 · Importante
+## Fase 2 · Centro en vivo
+- [x] Sonda del PC (ventana activa, inactividad, procesos, red) sin ventanas ni dependencias → [[Decisiones#Centro en vivo local]]
+- [x] Actividad: tiempo por app y por categoría (Programar, Navegar, Juegos, Multimedia), línea del día y tiempo por proyecto desde VS Code
+- [x] Proyectos en vivo: cambios sin subir, commits y horas de hoy, progreso y siguiente tarea del Roadmap, tokens de Claude de hoy
+- [x] Estado del PC: CPU, RAM, red en directo, discos y procesos que más consumen
+- [x] Buzón (ideas y errores pendientes) y Google Calendar de hoy
+- [ ] David activa la Google Calendar API y pulsa «Conectar Google Calendar»
+- [x] Interfaz con pestañas Hoy · Correo · Proyectos · PC
+- [x] Se abre en ventana propia al encender y acceso directo en el escritorio
+- [ ] David usa el centro unos días y dice qué sobra o falta
+
+## Fase 3 · Importante
 - [ ] Resumen sin datos sensibles (contadores, último código no) para el Centro de Operaciones
 - [ ] Marcar como leído/archivar desde el dashboard
 - [x] Sección «Amazon» con devoluciones, envíos y pedidos separados
 - [ ] Sección propia «Empleo» (LinkedIn, InfoJobs, Indeed…): secciones personalizables
 - [ ] Ajustar la detección de cursos con los asuntos reales de Moodle e Ilerna
 
-## Fase 3 · Extra
+## Fase 4 · Extra
 - [ ] Icono en la bandeja del sistema
 - [ ] Historial de gastos del banco por mes

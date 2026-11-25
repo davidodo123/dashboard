@@ -16,7 +16,7 @@ Si llega un código o un correo importante, sale una notificación en el PC. Arr
 - Los correos y el token **nunca** se suben: viven en `data/` (en .gitignore).
 
 ## Fase actual
-Fase 1 · Necesario: código hecho; falta que David cree las credenciales de Google y lo pruebe.
+Fase 2 · Centro en vivo: pasa de dashboard de correo a centro de todo lo que David hace en su PC (actividad, proyectos, PC, buzón, calendario y correo).
 
 ## Cómo usamos el diario
 - [[Roadmap]]: fases y tareas (de aquí sale el % del panel).

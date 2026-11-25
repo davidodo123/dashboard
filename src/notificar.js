@@ -1,12 +1,12 @@
 // Notificaciones nativas de Windows (toast) con node-notifier.
 import notifier from 'node-notifier';
-import { exec } from 'node:child_process';
+import { abrirVentana } from './ventana.js';
 
 let urlDashboard = 'http://127.0.0.1:4321';
 
 export function configurar(url) {
   urlDashboard = url;
-  notifier.on('click', () => exec(`start "" "${urlDashboard}"`));
+  notifier.on('click', () => abrirVentana(`${urlDashboard}/#correo`));
 }
 
 export function avisar(correo) {
@@ -14,7 +14,7 @@ export function avisar(correo) {
   notifier.notify({
     title: titulo,
     message: correo.codigo ? `${remitenteCorto(correo.de)} · ${correo.asunto}` : correo.asunto,
-    appID: 'Dashboard de correo',
+    appID: 'Centro en vivo',
     sound: true,
     wait: true,
   });

@@ -1,13 +1,17 @@
-// Gmail API con OAuth (aplicación de escritorio, redirección loopback). Solo lectura.
+// Google (Gmail y Calendar) con OAuth: aplicación de escritorio, redirección loopback. Solo lectura.
 import { readFile, writeFile, rm } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { randomBytes, createHash } from 'node:crypto';
 import { RUTAS } from './almacen.js';
 
-const SCOPE = 'https://www.googleapis.com/auth/gmail.readonly';
+export const PERMISOS = {
+  gmail: 'https://www.googleapis.com/auth/gmail.readonly',
+  calendario: 'https://www.googleapis.com/auth/calendar.readonly',
+};
+const SCOPE = Object.values(PERMISOS).join(' ');
 const API = 'https://gmail.googleapis.com/gmail/v1/users/me';
 
-let token = null; // { access_token, refresh_token, expires_at }
+let token = null; // { access_token, refresh_token, expires_at, scope }
 let pkce = null; // { verifier, state }
 
 async function credenciales() {
@@ -38,6 +42,7 @@ export async function urlAutorizacion(redirect) {
     scope: SCOPE,
     access_type: 'offline',
     prompt: 'consent',
+    include_granted_scopes: 'true',
     state: pkce.state,
     code_challenge: base64url(createHash('sha256').update(verifier).digest()),
     code_challenge_method: 'S256',
@@ -67,7 +72,7 @@ export async function canjearCodigo(code, state, redirect) {
   if (!pkce || state !== pkce.state) throw new Error('state OAuth no coincide');
   const j = await pedirToken({ grant_type: 'authorization_code', code, redirect_uri: redirect, code_verifier: pkce.verifier });
   pkce = null;
-  token = { access_token: j.access_token, refresh_token: j.refresh_token, expires_at: Date.now() + j.expires_in * 1000 };
+  token = { access_token: j.access_token, refresh_token: j.refresh_token, expires_at: Date.now() + j.expires_in * 1000, scope: j.scope || '' };
   await writeFile(RUTAS.token, JSON.stringify(token, null, 2));
 }
 
@@ -77,6 +82,29 @@ async function accessToken() {
   token = { ...token, access_token: j.access_token, expires_at: Date.now() + j.expires_in * 1000 };
   await writeFile(RUTAS.token, JSON.stringify(token, null, 2));
   return token.access_token;
+}
+
+/** ¿El permiso guardado incluye este servicio? ('gmail' | 'calendario') */
+export async function tienePermiso(servicio) {
+  if ((await estadoAuth()) !== 'autorizado') return false;
+  // Tokens antiguos sin 'scope' solo tenían Gmail.
+  return (token.scope || PERMISOS.gmail).split(' ').includes(PERMISOS[servicio]);
+}
+
+export async function getGoogle(url) {
+  const r = await fetch(url, { headers: { authorization: `Bearer ${await accessToken()}` } });
+  if (r.status === 401) {
+    token.expires_at = 0;
+    throw new Error('Google rechazó el acceso; se reintentará');
+  }
+  if (!r.ok) {
+    let msg = String(r.status);
+    try { msg = (await r.json()).error?.message || msg; } catch { /* sin cuerpo JSON */ }
+    const e = new Error(`Google: ${msg.slice(0, 160)}`);
+    e.status = r.status;
+    throw e;
+  }
+  return r.json();
 }
 
 async function api(ruta) {
