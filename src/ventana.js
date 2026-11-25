@@ -2,7 +2,6 @@
 import { spawn, exec, execFile } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
-import { RUTAS } from './almacen.js';
 
 export function rutaEdge() {
   const candidatos = [
@@ -32,14 +31,8 @@ export function minimizar() {
   { windowsHide: true }, () => {});
 }
 
-/** Tecla global Win+Esc: trae el sistema al frente (o lo abre). */
-export function escucharTecla(url) {
-  const p = spawn('powershell.exe', ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File',
-    path.join(RUTAS.raiz, 'scripts', 'tecla.ps1')], { windowsHide: true });
-  p.stdout.setEncoding('utf8');
-  p.stdout.on('data', (t) => {
-    if (t.includes('abrir')) abrirVentana(url, { pantallaCompleta: true });
-    if (t.includes('ocupada')) console.error('[tecla] Win+Esc ya la usa otra app');
-  });
-  process.on('exit', () => p.kill());
+/** Tecla global Win+Esc: la escucha la sonda (scripts/sonda.ps1); aquí se atienden sus eventos. */
+export function atenderTecla(evento, url) {
+  if (evento === 'abrir') abrirVentana(url, { pantallaCompleta: true });
+  if (evento === 'tecla-ocupada') console.error('[tecla] Win+Esc ya la usa otra app');
 }

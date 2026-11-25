@@ -219,7 +219,7 @@ servidor.listen(PUERTO, '127.0.0.1', () => {
   setInterval(leerGmail, INTERVALO);
   sistema.iniciar();
   lanzador.iniciar();
-  ventana.escucharTecla(`${BASE}/`);
+  sistema.alEvento((e) => ventana.atenderTecla(e, `${BASE}/`));
   proyectos.iniciar();
   buzon.iniciar();
   calendario.iniciar();

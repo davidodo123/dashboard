@@ -2,14 +2,55 @@
 #   app delante (proceso + nombre + título), segundos sin tocar teclado/ratón,
 #   procesos que más CPU/RAM gastan (cada 4 s) y bytes de red acumulados.
 # El título solo se usa en Node para sacar el proyecto de VS Code; no se guarda.
+# Además escucha la tecla global Win+Esc mientras espera entre vueltas (un proceso en vez de dos):
+#   si la ventana "Centro" existe la trae al frente; si no, escribe {"evento":"abrir"} para que el servidor la abra.
 $ErrorActionPreference = 'SilentlyContinue'
 [Console]::OutputEncoding = [Text.Encoding]::UTF8
 
 Add-Type @"
 using System;
 using System.Text;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 public static class Sonda {
+  [StructLayout(LayoutKind.Sequential)] struct MSG { public IntPtr h; public uint msg; public IntPtr w; public IntPtr l; public uint t; public int x; public int y; }
+  [DllImport("user32.dll")] static extern bool RegisterHotKey(IntPtr h, int id, uint mods, uint vk);
+  [DllImport("user32.dll")] static extern bool PeekMessage(out MSG m, IntPtr h, uint a, uint b, uint quitar);
+  [DllImport("user32.dll")] static extern uint MsgWaitForMultipleObjects(uint n, IntPtr[] h, bool todos, uint ms, uint mascara);
+  [DllImport("user32.dll")] static extern bool SetForegroundWindow(IntPtr h);
+  [DllImport("user32.dll")] static extern bool ShowWindow(IntPtr h, int cmd);
+  [DllImport("user32.dll")] static extern bool IsIconic(IntPtr h);
+
+  // MOD_WIN 8 | MOD_NOREPEAT 0x4000 ; VK_ESCAPE 0x1B  (Ctrl+Alt+Espacio la usa otra app en este PC)
+  public static bool RegistrarTecla() { return RegisterHotKey(IntPtr.Zero, 1, 0x4008, 0x1B); }
+
+  static IntPtr VentanaCentro() {
+    foreach (var p in Process.GetProcessesByName("msedge"))
+      if (p.MainWindowHandle != IntPtr.Zero && p.MainWindowTitle == "Centro") return p.MainWindowHandle;
+    return IntPtr.Zero;
+  }
+
+  // Espera ms milisegundos atendiendo los mensajes del hilo. Devuelve "abrir" si se pulsó la tecla
+  // y no hay ventana, "frente" si la trajo al frente, o null si no pasó nada.
+  public static string Esperar(int ms) {
+    string evento = null;
+    int fin = Environment.TickCount + ms;
+    while (true) {
+      int queda = fin - Environment.TickCount;
+      if (queda <= 0) break;
+      MsgWaitForMultipleObjects(0, null, false, (uint)queda, 0x04FF); // QS_ALLINPUT
+      MSG m;
+      while (PeekMessage(out m, IntPtr.Zero, 0, 0, 1)) {
+        if (m.msg != 0x0312) continue; // WM_HOTKEY
+        IntPtr h = VentanaCentro();
+        if (h == IntPtr.Zero) { evento = "abrir"; continue; }
+        if (IsIconic(h)) ShowWindow(h, 9);
+        SetForegroundWindow(h);
+        evento = "frente";
+      }
+    }
+    return evento;
+  }
   [DllImport("user32.dll")] static extern IntPtr GetForegroundWindow();
   [DllImport("user32.dll")] static extern int GetWindowText(IntPtr h, StringBuilder s, int n);
   [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);
@@ -23,6 +64,8 @@ public static class Sonda {
   }
 }
 "@
+
+if (-not [Sonda]::RegistrarTecla()) { [Console]::Out.WriteLine('{"evento":"tecla-ocupada"}'); [Console]::Out.Flush() }
 
 $nucleos = [Environment]::ProcessorCount
 $nombres = @{}          # proceso -> nombre bonito (descripción del ejecutable)
@@ -85,5 +128,7 @@ while ($true) {
 
   [Console]::Out.WriteLine(($salida | ConvertTo-Json -Compress -Depth 4))
   [Console]::Out.Flush()
-  Start-Sleep -Seconds 2
+  # En vez de dormir, espera 2 s atendiendo la tecla global.
+  $evento = [Sonda]::Esperar(2000)
+  if ($evento) { [Console]::Out.WriteLine((@{ evento = $evento } | ConvertTo-Json -Compress)); [Console]::Out.Flush() }
 }

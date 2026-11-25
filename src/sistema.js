@@ -14,8 +14,11 @@ let discos = [];
 let redAntes = null;
 let cpuAntes = os.cpus();
 const oyentes = [];
+const oyentesEvento = [];
 
 export const alMuestrear = (fn) => oyentes.push(fn);
+/** Eventos de la sonda: 'abrir' (Win+Esc sin ventana), 'frente', 'tecla-ocupada'. */
+export const alEvento = (fn) => oyentesEvento.push(fn);
 
 function cpuTotal() {
   const ahora = os.cpus();
@@ -64,7 +67,10 @@ function lanzarSonda() {
     resto = lineas.pop();
     for (const l of lineas) {
       if (!l.trim()) continue;
-      try { procesar(JSON.parse(l)); } catch { /* línea rota: se ignora */ }
+      let j;
+      try { j = JSON.parse(l); } catch { continue; /* línea rota: se ignora */ }
+      if (j.evento) oyentesEvento.forEach((fn) => fn(j.evento));
+      else procesar(j);
     }
   });
   sonda.on('exit', () => {

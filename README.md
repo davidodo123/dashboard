@@ -47,7 +47,7 @@ Para quitar los accesos directos: `npm run inicio:quitar`. A mano también se pu
 
 ## Cómo funciona
 
-- `scripts/sonda.ps1`: un único PowerShell sin ventana que cada 2 s dice qué app está delante, cuánto llevas sin tocar el PC, procesos y red.
+- `scripts/sonda.ps1`: un único PowerShell sin ventana que cada 2 s dice qué app está delante, cuánto llevas sin tocar el PC, procesos y red, y que entre vuelta y vuelta escucha la tecla global Win+Esc.
 - `src/actividad.js`: suma tiempo por app, por categoría (Programar, Navegar, Juegos, Multimedia, Otros) y por proyecto; un archivo por día en `data/actividad/`.
 - `src/proyectos.js`: repos locales con `diario/Roadmap.md`. Horas y progreso con las mismas fórmulas que el Centro de Operaciones; tokens de hoy leídos de `~/.claude/projects`.
 - `src/sistema.js`, `src/buzon.js`, `src/calendario.js`, `src/gmail.js`, `src/clasificar.js`: el resto de módulos.
