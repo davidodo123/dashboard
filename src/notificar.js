@@ -6,7 +6,7 @@ let urlDashboard = 'http://127.0.0.1:4321';
 
 export function configurar(url) {
   urlDashboard = url;
-  notifier.on('click', () => abrirVentana(`${urlDashboard}/#correo`));
+  notifier.on('click', () => abrirVentana(`${urlDashboard}/panel.html#correo`));
 }
 
 export function avisar(correo) {

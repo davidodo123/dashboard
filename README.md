@@ -1,5 +1,19 @@
 # Centro en vivo
 
+**Sistema de arranque a pantalla completa** para Windows: un menú en dos ejes (apartados en horizontal, elementos en vertical, foco fijo) desde el que se lanzan juegos de Steam, apps, carpetas, fotos y proyectos, y que además enseña en vivo tu actividad, tus proyectos, el estado del PC, el correo y el buzón.
+
+| Tecla | Qué hace |
+|---|---|
+| ← → | Cambiar de apartado (o de hermano, si has entrado en algo) |
+| ↑ ↓ / rueda | Elegir elemento |
+| Enter / A del mando | Jugar, abrir o entrar |
+| Esc / B / clic derecho | Volver |
+| O / X del mando | Abrir la carpeta en el Explorador |
+| **Win + Esc** | Traer el sistema desde cualquier juego o app |
+
+Apartados: Inicio (seguir con el último juego y proyecto, favoritas), Juegos, Apps, Fotos, Carpetas, Proyectos (Enter abre VS Code), Correo (Enter abre Gmail), PC y Buzón. La vista clásica de pestañas está en `/panel.html`.
+
+
 Centro de control local de lo que hago en mi PC. Se abre solo al encender, en una ventana propia, y se actualiza cada pocos segundos. Convive con el panel diario del [Centro de Operaciones](https://github.com/davidodo123/centro-operaciones): aquí está todo en vivo, incluido lo privado, y nada sale del PC.
 
 | Pestaña | Qué enseña |

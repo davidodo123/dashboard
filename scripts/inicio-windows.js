@@ -54,7 +54,7 @@ const q = (s) => s.replace(/"/g, '""');
 
 function vbs(edge) {
   const abrir = edge
-    ? `s.Run """${q(edge)}"" --app=" & url & " --window-size=1320,900", 1, False`
+    ? `s.Run """${q(edge)}"" --app=" & url & " --start-fullscreen", 1, False`
     : 's.Run url, 1, False';
   return [
     "' Centro en vivo: arranca el servidor si hace falta y abre la ventana. Lo genera scripts/inicio-windows.js.",
@@ -110,8 +110,8 @@ if (accion === 'instalar') {
   if (edge) await crearIcono(edge);
   else console.log('No encuentro Microsoft Edge: se abrirá en el navegador normal.');
   await writeFile(lanzador, vbs(edge));
-  crearAcceso(accesos.inicio, 'Centro en vivo: actividad, proyectos, PC, correo, buzón y calendario');
-  crearAcceso(accesos.escritorio, 'Abre el Centro en vivo');
+  crearAcceso(accesos.inicio, 'Centro: sistema de arranque a pantalla completa (juegos, apps, carpetas, fotos y proyectos)');
+  crearAcceso(accesos.escritorio, 'Abre el Centro a pantalla completa (Win+Esc desde cualquier sitio)');
   for (const v of viejos) await rm(v, { force: true });
   console.log('Instalado:');
   console.log(`  · "Centro en vivo" en Inicio: se abre al encender (Configuración > Aplicaciones > Inicio).`);

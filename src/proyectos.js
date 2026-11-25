@@ -107,6 +107,7 @@ async function analizar(p) {
   return {
     nombre: p.nombre,
     carpeta: p.carpeta,
+    dir: p.dir,
     repo: p.repo,
     rama,
     cambios: estado ? estado.split('\n').filter(Boolean).length : 0,

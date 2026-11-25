@@ -16,7 +16,7 @@ Si llega un código o un correo importante, sale una notificación en el PC. Arr
 - Los correos y el token **nunca** se suben: viven en `data/` (en .gitignore).
 
 ## Fase actual
-Fase 2 · Centro en vivo: pasa de dashboard de correo a centro de todo lo que David hace en su PC (actividad, proyectos, PC, buzón, calendario y correo).
+Fase 3 · Sistema de arranque: el centro es ahora un sistema a pantalla completa en dos ejes desde el que se lanzan juegos, apps, carpetas, fotos y proyectos. Pendiente de que David lo use.
 
 ## Cómo usamos el diario
 - [[Roadmap]]: fases y tareas (de aquí sale el % del panel).

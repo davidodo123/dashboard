@@ -11,6 +11,8 @@ import * as actividad from './actividad.js';
 import * as proyectos from './proyectos.js';
 import * as buzon from './buzon.js';
 import * as calendario from './calendario.js';
+import * as lanzador from './lanzador.js';
+import * as ventana from './ventana.js';
 
 const PUERTO = Number(process.env.PUERTO) || 4321;
 const INTERVALO = (Number(process.env.INTERVALO_SEGUNDOS) || 60) * 1000;
@@ -132,6 +134,22 @@ const servidor = http.createServer(async (req, res) => {
         ultimoError,
       });
     }
+    if (req.method === 'GET' && (await lanzador.atender(url, res))) return;
+    if (url.pathname === '/api/sistema' && req.method === 'GET') {
+      return json(res, 200, await lanzador.catalogo(await actividad.appsSemana(), proyectos.estado().proyectos));
+    }
+    if (url.pathname === '/api/lanzar' && req.method === 'POST') {
+      const pedido = await cuerpo(req);
+      const nombre = await lanzador.lanzar(pedido, proyectos.estado().proyectos);
+      // Al lanzar un juego o una app, el sistema se aparta; vuelve con Win+Esc.
+      if (['juego', 'app'].includes(pedido.tipo)) setTimeout(ventana.minimizar, 1200);
+      return json(res, 200, { ok: true, nombre });
+    }
+    if (url.pathname === '/api/ventana' && req.method === 'POST') {
+      const { accion } = await cuerpo(req);
+      if (accion === 'minimizar') ventana.minimizar();
+      return json(res, 200, { ok: true });
+    }
     if (url.pathname === '/api/vivo' && req.method === 'GET') {
       const s = sistema.estado();
       return json(res, 200, { ...s, historia: s.historia.slice(-90), actividad: actividad.estado().ahora });
@@ -200,6 +218,8 @@ servidor.listen(PUERTO, '127.0.0.1', () => {
   leerGmail();
   setInterval(leerGmail, INTERVALO);
   sistema.iniciar();
+  lanzador.iniciar();
+  ventana.escucharTecla(`${BASE}/`);
   proyectos.iniciar();
   buzon.iniciar();
   calendario.iniciar();

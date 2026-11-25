@@ -128,3 +128,14 @@ export async function semana() {
   }
   return dias;
 }
+
+/** Apps usadas en los últimos 7 días (para las favoritas del sistema de arranque). */
+export async function appsSemana() {
+  const dias = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(Date.now() - i * 864e5);
+    const f = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    dias.push(f === dia?.fecha ? dia : await cargar(f));
+  }
+  return dias;
+}

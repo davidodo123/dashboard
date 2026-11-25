@@ -31,13 +31,28 @@ Leyenda: `[x]` hecho · `[ ]` pendiente · `[/]` empezado · `[-]` descartado
 - [x] Se abre en ventana propia al encender y acceso directo en el escritorio
 - [ ] David usa el centro unos días y dice qué sobra o falta
 
-## Fase 3 · Importante
+## Fase 3 · Sistema de arranque
+- [x] Elegir la navegación: dirección A (dos ejes) entre tres prototipos → [[Decisiones#Sistema de arranque sobre el Centro en vivo]]
+- [x] Catálogo: juegos de Steam con carátula, fondo y logo; apps del menú Inicio y de la Store con su icono; favoritas por uso real
+- [x] Carpetas navegables (Escritorio, Documentos, Descargas, Imágenes, Vídeos, Música) y fotos recientes en grande
+- [x] Proyectos con su progreso y Enter para abrirlos en VS Code; correo abre en Gmail
+- [x] Lanzar solo cosas del catálogo; rutas comprobadas dentro de tus carpetas (tests)
+- [x] Pantalla completa al encender, acceso «Centro» en el escritorio y tecla global Win+Esc para volver
+- [x] Teclado, ratón, rueda y mando
+- [ ] David lo usa: lanza un juego, una app, abre una carpeta y vuelve con Win+Esc
+- [ ] Volver solo al sistema al cerrar un juego (detectar el proceso)
+- [ ] Spotify: lo que suena, play/pausa y playlists
+- [ ] Sonidos de navegación cortos y sin retraso
+- [ ] Visor de PDF y Markdown dentro del sistema
+- [ ] Empaquetar como app nativa (Tauri) cuando estén Rust y MSVC
+
+## Fase 4 · Importante
 - [ ] Resumen sin datos sensibles (contadores, último código no) para el Centro de Operaciones
 - [ ] Marcar como leído/archivar desde el dashboard
 - [x] Sección «Amazon» con devoluciones, envíos y pedidos separados
 - [ ] Sección propia «Empleo» (LinkedIn, InfoJobs, Indeed…): secciones personalizables
 - [ ] Ajustar la detección de cursos con los asuntos reales de Moodle e Ilerna
 
-## Fase 4 · Extra
+## Fase 5 · Extra
 - [ ] Icono en la bandeja del sistema
 - [ ] Historial de gastos del banco por mes
