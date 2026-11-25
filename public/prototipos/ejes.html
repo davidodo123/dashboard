@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Centro · Ejes</title>
+<link rel="icon" href="/icono.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/centro.css">
+<style>
+  :root {
+    color-scheme: dark;
+    --fondo: #0b0c0e; --texto: #eceae4; --suave: #a7a59d; --tenue: #6d6b65; --linea: #24252a;
+    --acento: #3987e5; --hundido: #17181c;
+    --a-programar: #3987e5; --a-navegar: #d95926; --a-juegos: #199e70; --a-multimedia: #c98500; --a-otros: #55544f;
+    --eje-x: 22vw; --eje-y: 31vh;
+    --mov: 260ms cubic-bezier(.2, .8, .2, 1);
+    font-family: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+  }
+  @media (prefers-reduced-motion: reduce) { :root { --mov: 0ms linear; } }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: var(--fondo); color: var(--texto); }
+  body { user-select: none; }
+
+  /* línea del eje horizontal, muy tenue: la cruz es la única estructura */
+  .regla { position: fixed; left: 0; right: 0; top: calc(var(--eje-y) + 62px); height: 1px; background: var(--linea); }
+
+  .arriba { position: fixed; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; padding: 22px 40px; font-size: 14px; color: var(--suave); }
+  .ruta { display: flex; gap: 10px; align-items: center; }
+  .ruta b { color: var(--texto); font-weight: 600; }
+  .ruta span + span::before { content: "/"; margin-right: 10px; color: var(--tenue); }
+  .reloj { display: flex; gap: 22px; font-variant-numeric: tabular-nums; }
+  .reloj b { color: var(--texto); font-weight: 500; }
+
+  /* eje horizontal */
+  .fila { position: fixed; top: var(--eje-y); left: 0; height: 62px; display: flex; gap: 46px; transition: transform var(--mov); will-change: transform; }
+  .apartado { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; width: 120px; color: var(--tenue); cursor: pointer; transition: color var(--mov), opacity var(--mov); }
+  .apartado .ico { width: 28px; height: 28px; transition: transform var(--mov); transform-origin: left bottom; }
+  .apartado .nom { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
+  .apartado.foco { color: var(--texto); }
+  .apartado.foco .ico { transform: scale(1.45); }
+  .apartado.foco .nom { font-weight: 600; }
+  .apartado .inicial { width: 28px; height: 28px; border-radius: 7px; border: 1.6px solid currentColor; display: grid; place-items: center; font-size: 13px; font-weight: 600; transition: transform var(--mov); transform-origin: left bottom; }
+  .apartado.foco .inicial { transform: scale(1.45); }
+
+  /* eje vertical */
+  .columna { position: fixed; left: var(--eje-x); top: 0; width: 30vw; transition: transform var(--mov); will-change: transform; }
+  .elem { height: 64px; display: flex; flex-direction: column; justify-content: center; padding-left: 2px; color: var(--suave); cursor: pointer; transition: opacity var(--mov), color var(--mov); }
+  .elem .t { font-size: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 10px; }
+  .elem .s { font-size: 13px; color: var(--tenue); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+  .elem.foco { color: var(--texto); }
+  .elem.foco .t { font-size: 24px; font-weight: 600; }
+  .elem.foco .s { color: var(--suave); }
+  .elem.antes { opacity: .28; }
+  .elem.lejos { opacity: .12; }
+  .punto { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+  .tiene { color: var(--tenue); font-size: 13px; font-weight: 400; }
+
+  /* detalle */
+  .detalle { position: fixed; left: 56vw; right: 40px; top: calc(var(--eje-y) + 100px); bottom: 90px; overflow: hidden; }
+  .detalle .cifra { font-size: 68px; line-height: 1; font-weight: 300; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .detalle .sub { margin-top: 10px; font-size: 16px; color: var(--suave); }
+  .detalle .barra { margin-top: 22px; height: 6px; border-radius: 3px; background: var(--hundido); overflow: hidden; }
+  .detalle .barra span { display: block; height: 100%; background: var(--acento); border-radius: 3px; transition: width var(--mov); }
+  .detalle dl { margin: 28px 0 0; display: grid; grid-template-columns: 130px 1fr; gap: 10px 16px; font-size: 15px; }
+  .detalle dt { color: var(--tenue); }
+  .detalle dd { margin: 0; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .detalle .nota { margin-top: 22px; padding: 14px 16px; border-left: 2px solid var(--linea); color: var(--suave); font-size: 15px; line-height: 1.5; max-width: 560px; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+  .detalle .entrar { margin-top: 26px; font-size: 14px; color: var(--tenue); }
+  .detalle .entrar kbd { color: var(--texto); }
+  .detalle svg.mini { display: block; width: 100%; height: 90px; margin-top: 22px; }
+  .detalle svg.mini path { fill: none; stroke: var(--acento); stroke-width: 2; vector-effect: non-scaling-stroke; }
+  .detalle .cats { margin-top: 26px; display: flex; height: 10px; gap: 2px; }
+  .detalle .cats span { border-radius: 2px; }
+  .detalle .cats-ley { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; color: var(--suave); }
+  .detalle .cats-ley i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; }
+
+  .teclas { position: fixed; left: 40px; bottom: 24px; display: flex; gap: 26px; font-size: 13px; color: var(--tenue); }
+  kbd { font: inherit; color: var(--suave); border: 1px solid var(--linea); border-radius: 5px; padding: 1px 6px; margin-right: 6px; }
+  .ambiente { position: fixed; left: var(--eje-x); top: 13vh; margin: 0; font-size: 15px; color: var(--tenue); display: flex; align-items: center; gap: 10px; transition: opacity var(--mov); }
+  .ambiente b { color: var(--suave); font-weight: 500; }
+  .ambiente.tapado { opacity: 0; }
+  .comparar { margin-top: 26px; display: grid; gap: 5px; max-width: 520px; }
+  .comparar div { display: grid; grid-template-columns: 150px 1fr; align-items: center; gap: 12px; font-size: 13px; color: var(--tenue); }
+  .comparar div span:first-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .comparar i { display: block; height: 6px; border-radius: 0 3px 3px 0; background: var(--linea); }
+  .comparar .yo { color: var(--texto); }
+  .comparar .yo i { background: var(--c, var(--acento)); }
+  .velo { position: fixed; left: 0; right: 0; bottom: 0; height: 130px; background: linear-gradient(transparent, var(--fondo) 62%); pointer-events: none; }
+  .teclas { z-index: 2; }
+  .cargando { position: fixed; inset: 0; display: grid; place-items: center; color: var(--tenue); }
+</style>
+</head>
+<body>
+<div class="regla" aria-hidden="true"></div>
+<header class="arriba">
+  <nav class="ruta" id="ruta" aria-label="Dónde estás"></nav>
+  <div class="reloj" aria-live="off"><span>CPU <b id="r-cpu">–</b></span><span>RAM <b id="r-ram">–</b></span><b id="r-hora"></b></div>
+</header>
+<p class="ambiente" id="ambiente" aria-live="off"></p>
+<div class="fila" id="fila" role="tablist" aria-label="Eje horizontal"></div>
+<div class="columna" id="columna" role="listbox" aria-label="Eje vertical"></div>
+<section class="detalle" id="detalle" aria-live="polite"></section>
+<div class="velo" aria-hidden="true"></div>
+<footer class="teclas"><span><kbd>← →</kbd>cambiar</span><span><kbd>↑ ↓</kbd>recorrer</span><span><kbd>Enter</kbd>entrar</span><span><kbd>Esc</kbd>volver</span></footer>
+<div class="cargando" id="cargando">Leyendo tu PC…</div>
+
+<script type="module">
+import { cargarArbol, vivo, icono, CAT_COLOR } from './datos.js';
+
+const $ = (s) => document.querySelector(s);
+const esc = (t) => String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+let raiz;
+// pila de niveles: cada nivel = { nodo (padre del eje horizontal), h (índice horizontal), v: {id: índice vertical} }
+let pila = [];
+let datosVivo = null;
+
+const nivel = () => pila.at(-1);
+const horizontales = () => nivel().nodo.hijos;
+const actual = () => horizontales()[nivel().h];
+const verticales = () => actual()?.hijos || [];
+const vIndex = () => nivel().v[actual()?.id] ?? 0;
+const enfocado = () => verticales()[vIndex()];
+
+function pintar() {
+  const n = nivel();
+  // ruta
+  $('#ruta').innerHTML = pila.map((p, i) => `<span>${i === pila.length - 1 ? `<b>${esc(p.nodo.nombre)}</b>` : esc(p.nodo.nombre)}</span>`).join('') + (actual() ? `<span><b>${esc(actual().nombre)}</b></span>` : '');
+
+  // eje horizontal: el foco queda siempre en --eje-x
+  const fila = $('#fila');
+  fila.innerHTML = horizontales().map((x, i) => `
+    <div class="apartado${i === n.h ? ' foco' : ''}" role="tab" aria-selected="${i === n.h}" data-h="${i}">
+      ${x.icono ? icono(x.icono) : `<span class="inicial">${esc(x.nombre[0])}</span>`}
+      <span class="nom">${esc(x.nombre)}</span>
+    </div>`).join('');
+  const paso = 166; // ancho 120 + hueco 46
+  fila.style.transform = `translateX(calc(var(--eje-x) - ${n.h * paso}px))`;
+  const vh = innerHeight / 100;
+  const ejeXpx = 22 * innerWidth / 100;
+  fila.querySelectorAll('.apartado').forEach((el, i) => { const x = ejeXpx + (i - n.h) * paso; el.style.opacity = x < 24 || x > innerWidth - 60 ? 0 : 1; });
+
+  // eje vertical: el elemento enfocado queda justo debajo de la cruz
+  const col = $('#columna');
+  const vi = vIndex();
+  col.innerHTML = verticales().map((x, i) => `
+    <div class="elem${i === vi ? ' foco' : ''}${i < vi ? (vi - i > 2 ? ' lejos' : ' antes') : ''}${i > vi + 6 ? ' lejos' : ''}" role="option" aria-selected="${i === vi}" data-v="${i}">
+      <span class="t">${x.color ? `<i class="punto" style="background:${x.color}"></i>` : ''}${esc(x.nombre)}${x.hijos?.length ? ` <span class="tiene">${x.hijos.length}</span>` : ''}</span>
+      <span class="s">${esc([x.etiqueta, x.sub].filter(Boolean).join(' · '))}</span>
+    </div>`).join('') || '<div class="elem foco"><span class="s">Vacío</span></div>';
+  const ejeY = 31 * vh + 62 + 26; // debajo de la fila
+  // los anteriores suben por encima de la fila: se saltan su hueco
+  col.style.transform = `translateY(${ejeY - vi * 64 - (vi > 0 ? 110 : 0)}px)`;
+  col.querySelectorAll('.elem').forEach((el, i) => { el.style.transform = i < vi ? 'translateY(0)' : `translateY(${vi > 0 ? 110 : 0}px)`; el.style.transition = 'transform var(--mov), opacity var(--mov)'; });
+
+  // el ambiente se esconde cuando los elementos anteriores suben a esa zona
+  $('#ambiente').classList.toggle('tapado', vi > 0);
+  pintarDetalle();
+}
+
+function pintarAmbiente() {
+  const a = datosVivo?.actividad;
+  $('#ambiente').innerHTML = a
+    ? `<i class="punto" style="background:${CAT_COLOR[a.categoria]}"></i>Delante ahora: <b>${esc(a.app)}</b>${a.proyecto ? ` · ${esc(a.proyecto)}` : ''} · ${Math.max(1, Math.round((Date.now() - a.desde) / 60000))} min`
+    : 'Sin actividad: más de 2 min sin tocar el PC';
+}
+
+function serie(clave) {
+  const h = datosVivo?.historia || [];
+  const vals = h.map((x) => x[clave]);
+  if (vals.length < 2) return '';
+  const max = clave === 'bajada' ? Math.max(1, ...vals) * 1.1 : 100;
+  const d = vals.map((v, i) => `${i ? 'L' : 'M'}${(i / (vals.length - 1)) * 100},${40 - (v / max) * 38}`).join('');
+  return `<svg class="mini" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><path d="${d}"/></svg>`;
+}
+
+function comparar(x) {
+  const hermanos = verticales();
+  if (!enfocado() || hermanos.length < 3 || !['apps', 'procesos'].includes(actual()?.id)) return '';
+  const max = Math.max(...hermanos.map((h) => h.valor || 0)) || 1;
+  return `<div class="comparar" aria-label="Comparado con el resto">${hermanos.slice(0, 8).map((h) => `
+    <div class="${h === x ? 'yo' : ''}" style="--c:${h.color || 'var(--acento)'}"><span>${esc(h.nombre)}</span><i style="width:${Math.max(2, (100 * (h.valor || 0)) / max)}%"></i></div>`).join('')}</div>`;
+}
+
+function pintarDetalle() {
+  const d = $('#detalle');
+  const x = enfocado() || actual();
+  if (!x) { d.innerHTML = ''; return; }
+  let cifra = x.etiqueta || '';
+  if (x.vivo && datosVivo) {
+    const a = datosVivo.ahora;
+    cifra = x.vivo === 'bajada' ? `${Math.round(a.bajada / 1024)} KB/s` : `${Math.round(a[x.vivo])} %`;
+  }
+  const cats = x.categorias || (enfocado() ? null : actual().categorias);
+  const total = cats ? cats.reduce((s, c) => s + c.s, 0) || 1 : 0;
+  d.innerHTML = `
+    <div class="cifra">${esc(cifra)}</div>
+    <div class="sub">${esc(x.nombre)}${x.sub ? ` · ${esc(x.sub)}` : ''}</div>
+    ${x.progreso != null ? `<div class="barra" role="img" aria-label="${x.progreso} %"><span style="width:${x.progreso}%"></span></div>` : ''}
+    ${x.vivo ? serie(x.vivo) : ''}
+    ${cats ? `<div class="cats">${cats.filter((c) => c.s).map((c) => `<span style="flex:${c.s};background:${CAT_COLOR[c.categoria]}"></span>`).join('')}</div>
+      <div class="cats-ley">${cats.map((c) => `<span><i style="background:${CAT_COLOR[c.categoria]}"></i>${c.categoria}</span>`).join('')}</div>` : ''}
+    ${x.campos ? `<dl>${x.campos.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : ''}
+    ${comparar(x)}
+    ${x.texto ? `<div class="nota">${esc(x.texto)}</div>` : ''}
+    ${x.hijos?.length ? `<div class="entrar"><kbd>Enter</kbd>entrar en ${x.hijos.length} elemento${x.hijos.length === 1 ? '' : 's'}</div>` : ''}`;
+}
+
+// ---------- movimiento ----------
+function moverH(d) {
+  const n = nivel();
+  n.h = Math.max(0, Math.min(horizontales().length - 1, n.h + d));
+  pintar();
+}
+function moverV(d) {
+  const n = nivel();
+  const id = actual()?.id;
+  if (!id) return;
+  n.v[id] = Math.max(0, Math.min(verticales().length - 1, vIndex() + d));
+  pintar();
+}
+function entrar() {
+  const x = enfocado();
+  if (!x?.hijos?.length) return;
+  // el elemento elegido pasa al eje horizontal junto a sus hermanos
+  pila.push({ nodo: actual(), h: vIndex(), v: {} });
+  pintar();
+}
+function volver() {
+  if (pila.length > 1) { pila.pop(); pintar(); }
+}
+
+addEventListener('keydown', (e) => {
+  const k = { ArrowLeft: () => moverH(-1), ArrowRight: () => moverH(1), ArrowUp: () => moverV(-1), ArrowDown: () => moverV(1),
+    Enter: entrar, Escape: volver, Backspace: volver }[e.key];
+  if (k) { e.preventDefault(); k(); }
+});
+let rueda = 0;
+addEventListener('wheel', (e) => {
+  rueda += e.deltaY;
+  if (Math.abs(rueda) > 60) { moverV(Math.sign(rueda)); rueda = 0; }
+}, { passive: true });
+$('#fila').addEventListener('click', (e) => { const el = e.target.closest('[data-h]'); if (el) { nivel().h = +el.dataset.h; pintar(); } });
+$('#columna').addEventListener('click', (e) => {
+  const el = e.target.closest('[data-v]'); if (!el) return;
+  const i = +el.dataset.v;
+  if (i === vIndex()) entrar(); else { nivel().v[actual().id] = i; pintar(); }
+});
+
+// ---------- arranque ----------
+setInterval(() => { $('#r-hora').textContent = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }); }, 1000);
+vivo((v) => {
+  datosVivo = v;
+  $('#r-cpu').textContent = `${Math.round(v.ahora.cpu ?? 0)} %`;
+  $('#r-ram').textContent = `${Math.round(v.ahora.ram ?? 0)} %`;
+  pintarAmbiente();
+  if (raiz && enfocado()?.vivo) pintarDetalle();
+});
+raiz = await cargarArbol();
+pila = [{ nodo: raiz, h: 0, v: {} }];
+// #h/v para abrir en un sitio concreto (útil para compartir una vista o capturarla)
+const [hh, vv] = location.hash.slice(1).split('/').map(Number);
+if (hh >= 0 && hh < raiz.hijos.length) { pila[0].h = hh; if (vv >= 0) pila[0].v[raiz.hijos[hh].id] = vv; }
+$('#cargando').remove();
+pintar();
+addEventListener('resize', pintar);
+</script>
+</body>
+</html>

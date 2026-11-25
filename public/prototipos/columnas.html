@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Centro · Columnas</title>
+<link rel="icon" href="/icono.svg" type="image/svg+xml">
+<style>
+  :root {
+    color-scheme: light;
+    --fondo: #eef0f3; --panel: #ffffff; --texto: #14161a; --suave: #555a63; --tenue: #868b94; --linea: #dfe2e7;
+    --sel: #e6eaf0; --acento: #2a78d6; --acento-suave: #dbe8f8; --acento-texto: #ffffff;
+    --a-programar: #2a78d6; --a-navegar: #eb6834; --a-juegos: #1baf7a; --a-multimedia: #eda100; --a-otros: #b9b8b2;
+    --mono: "Cascadia Mono", Consolas, ui-monospace, monospace;
+    font: 14px/1.4 "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--fondo); color: var(--texto); }
+  body { display: grid; grid-template-rows: auto auto 1fr auto; height: 100vh; overflow: hidden; }
+  :focus-visible { outline: 2px solid var(--acento); outline-offset: -2px; }
+
+  /* barra de comando */
+  .comando { padding: 14px 16px 10px; position: relative; }
+  .comando label { display: flex; align-items: center; gap: 10px; background: var(--panel); border: 1px solid var(--linea); border-radius: 10px; padding: 0 12px; height: 44px; }
+  .comando label:focus-within { border-color: var(--acento); box-shadow: 0 0 0 3px var(--acento-suave); }
+  .comando svg { width: 18px; height: 18px; color: var(--tenue); flex: none; }
+  .comando input { flex: 1; border: 0; outline: 0; font: inherit; font-size: 15px; background: transparent; color: var(--texto); }
+  .comando kbd { font: 12px var(--mono); color: var(--tenue); border: 1px solid var(--linea); border-radius: 5px; padding: 2px 6px; }
+  .resultados { position: absolute; left: 16px; right: 16px; top: 62px; z-index: 5; background: var(--panel); border: 1px solid var(--linea); border-radius: 10px; box-shadow: 0 12px 32px rgb(20 22 26 / .12); max-height: 60vh; overflow: auto; padding: 6px; }
+  .resultados[hidden] { display: none; }
+  .res { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; padding: 8px 10px; border-radius: 7px; cursor: pointer; }
+  .res.activo { background: var(--acento-suave); }
+  .res .r-ruta { grid-column: 1; font-size: 12px; color: var(--tenue); }
+  .res .r-val { grid-row: 1 / span 2; grid-column: 2; align-self: center; font: 13px var(--mono); color: var(--suave); }
+  .res mark { background: none; color: var(--acento); font-weight: 600; }
+
+  /* ruta */
+  .ruta { display: flex; align-items: center; gap: 6px; padding: 0 18px 10px; font-size: 13px; color: var(--suave); white-space: nowrap; overflow: hidden; }
+  .ruta button { all: unset; cursor: pointer; padding: 2px 6px; border-radius: 5px; }
+  .ruta button:hover { background: var(--sel); color: var(--texto); }
+  .ruta button:last-child { color: var(--texto); font-weight: 600; }
+  .ruta .sep { color: var(--tenue); }
+
+  /* columnas */
+  .navegador { display: grid; grid-template-columns: 210px 300px 270px minmax(0, 1fr); gap: 0; margin: 0 16px; background: var(--panel); border: 1px solid var(--linea); border-radius: 12px; overflow: hidden; min-height: 0; }
+  .col { border-right: 1px solid var(--linea); overflow-y: auto; min-height: 0; padding: 6px; }
+  .col-titulo { font-size: 12px; color: var(--tenue); padding: 8px 10px 6px; display: flex; justify-content: space-between; }
+  .col.activa .col-titulo { color: var(--acento); }
+  .fila { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 4px 10px; padding: 7px 10px; border-radius: 7px; cursor: pointer; }
+  .fila:hover { background: #f4f6f9; }
+  .fila.sel { background: var(--sel); }
+  .col.activa .fila.sel { background: var(--acento); color: var(--acento-texto); }
+  .col.activa .fila.sel .f-sub, .col.activa .fila.sel .f-val { color: rgb(255 255 255 / .85); }
+  .col.activa .fila.sel .f-barra i { background: rgb(255 255 255 / .9); }
+  .f-ico { width: 18px; height: 18px; color: var(--suave); }
+  .col.activa .fila.sel .f-ico { color: inherit; }
+  .f-punto { width: 8px; height: 8px; border-radius: 2px; }
+  .f-nom { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .f-val { font: 12.5px var(--mono); color: var(--suave); white-space: nowrap; }
+  .f-sub { grid-column: 2 / -1; font-size: 12px; color: var(--tenue); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: -2px; }
+  .f-barra { grid-column: 2 / -1; height: 3px; background: var(--linea); border-radius: 2px; overflow: hidden; }
+  .f-barra i { display: block; height: 100%; background: var(--c, var(--acento)); }
+  .f-mas { color: var(--tenue); font-size: 12px; }
+  .vacia { color: var(--tenue); padding: 10px; font-size: 13px; }
+
+  /* detalle */
+  .detalle { overflow-y: auto; padding: 22px 26px; min-height: 0; }
+  .d-tipo { font-size: 12px; color: var(--tenue); }
+  .d-nombre { margin: 4px 0 0; font-size: 22px; font-weight: 600; line-height: 1.2; overflow-wrap: anywhere; }
+  .d-cifra { margin-top: 18px; font: 600 40px/1 var(--mono); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .d-sub { margin-top: 6px; color: var(--suave); }
+  .d-barra { margin-top: 16px; height: 8px; background: var(--sel); border-radius: 4px; overflow: hidden; }
+  .d-barra i { display: block; height: 100%; background: var(--acento); }
+  .d-campos { margin: 20px 0 0; display: grid; grid-template-columns: 120px 1fr; border-top: 1px solid var(--linea); }
+  .d-campos dt, .d-campos dd { margin: 0; padding: 9px 0; border-bottom: 1px solid var(--linea); }
+  .d-campos dt { color: var(--suave); }
+  .d-campos dd { overflow-wrap: anywhere; }
+  .d-nota { margin-top: 18px; background: var(--fondo); border-radius: 8px; padding: 12px 14px; color: var(--suave); line-height: 1.5; }
+  .d-grafica { margin-top: 18px; }
+  .d-grafica svg { width: 100%; height: 110px; display: block; }
+  .d-grafica path { fill: none; stroke: var(--acento); stroke-width: 2; vector-effect: non-scaling-stroke; }
+  .d-grafica .area { fill: var(--acento); opacity: .1; stroke: none; }
+  .d-hermanos { margin-top: 26px; display: grid; gap: 6px; }
+  .d-hermanos .d-tipo { margin-bottom: 4px; }
+  .d-hermanos > div:not(.d-tipo) { display: grid; grid-template-columns: 150px 1fr 70px; align-items: center; gap: 10px; font-size: 13px; color: var(--tenue); }
+  .d-hermanos span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .d-hermanos i { display: block; height: 6px; border-radius: 0 3px 3px 0; background: var(--linea); }
+  .d-hermanos b { font: 12px var(--mono); text-align: right; color: var(--tenue); font-weight: 400; }
+  .d-hermanos .yo { color: var(--texto); }
+  .d-hermanos .yo i { background: var(--c); }
+  .d-hermanos .yo b { color: var(--texto); }
+  .d-pie { margin-top: 18px; font-size: 12px; color: var(--tenue); }
+
+  /* barra de estado */
+  .estado { display: flex; align-items: center; gap: 22px; padding: 10px 18px; font-size: 13px; color: var(--suave); }
+  .estado b { font: 600 13px var(--mono); color: var(--texto); }
+  .estado .delante { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .estado .teclas { color: var(--tenue); }
+  .estado kbd { font: 11px var(--mono); border: 1px solid var(--linea); border-radius: 4px; padding: 1px 5px; color: var(--suave); background: var(--panel); }
+</style>
+</head>
+<body>
+<div class="comando">
+  <label>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg>
+    <input id="buscar" placeholder="Ir a… una app, proceso, proyecto, fase o correo" autocomplete="off" aria-controls="resultados">
+    <kbd>Ctrl K</kbd>
+  </label>
+  <div class="resultados" id="resultados" role="listbox" hidden></div>
+</div>
+<nav class="ruta" id="ruta" aria-label="Dónde estás"></nav>
+<main class="navegador" id="navegador">
+  <section class="col" data-col="0"></section>
+  <section class="col" data-col="1"></section>
+  <section class="col" data-col="2"></section>
+  <section class="detalle" id="detalle" aria-live="polite"></section>
+</main>
+<footer class="estado">
+  <span>CPU <b id="e-cpu">–</b></span><span>RAM <b id="e-ram">–</b></span><span>Red <b id="e-red">–</b></span>
+  <span class="teclas"><kbd>↑↓</kbd> recorrer · <kbd>→</kbd> abrir · <kbd>←</kbd> volver</span>
+  <span class="delante" id="delante"></span>
+</footer>
+
+<script type="module">
+import { cargarArbol, vivo, icono, velocidad } from './datos.js';
+const $ = (s) => document.querySelector(s);
+const esc = (t) => String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+let raiz;
+let ruta = [0, 0, -1]; // índice elegido en cada columna (-1 = nada)
+let activa = 0; // columna con el foco del teclado
+let datosVivo = null;
+
+const nodoCol = (c) => {
+  // lista de la columna c
+  let n = raiz;
+  for (let i = 0; i < c; i++) n = n?.hijos?.[ruta[i]];
+  return n?.hijos || [];
+};
+const elegido = (c) => nodoCol(c)[ruta[c]];
+function profundo() {
+  for (let c = 2; c >= 0; c--) if (elegido(c)) return { nodo: elegido(c), c };
+  return null;
+}
+
+function pintarCol(c) {
+  const el = document.querySelector(`.col[data-col="${c}"]`);
+  const lista = nodoCol(c);
+  const padre = c === 0 ? raiz : elegido(c - 1);
+  el.classList.toggle('activa', c === activa);
+  if (c > 0 && !padre) { el.innerHTML = ''; return; }
+  const max = Math.max(...lista.map((x) => x.valor || 0)) || 1;
+  el.innerHTML = `<div class="col-titulo"><span>${esc(padre.nombre)}</span><span>${lista.length}</span></div>` + (lista.length ? lista.map((x, i) => `
+    <div class="fila${i === ruta[c] ? ' sel' : ''}" data-c="${c}" data-i="${i}" role="option" aria-selected="${i === ruta[c]}">
+      ${x.icono ? icono(x.icono, 'f-ico') : x.color ? `<i class="f-punto" style="background:${x.color}"></i>` : '<span></span>'}
+      <span class="f-nom">${esc(x.nombre)}</span>
+      <span class="f-val">${esc(x.etiqueta ?? '')}${x.hijos?.length ? ' <span class="f-mas">›</span>' : ''}</span>
+      ${c === 0 ? `<span class="f-sub">${esc(x.sub ?? '')}</span>` : x.progreso != null
+        ? `<span class="f-barra"><i style="width:${x.progreso}%"></i></span>`
+        : (c > 0 && lista.length > 2 && x.valor ? `<span class="f-barra" style="--c:${x.color || 'var(--acento)'}"><i style="width:${(100 * x.valor) / max}%"></i></span>` : `<span class="f-sub">${esc(x.sub ?? '')}</span>`)}
+    </div>`).join('') : `<div class="vacia">Nada aquí.</div>`);
+  el.querySelector('.fila.sel')?.scrollIntoView({ block: 'nearest' });
+}
+
+function grafica(clave) {
+  const h = datosVivo?.historia || [];
+  const v = h.map((x) => x[clave]);
+  if (v.length < 2) return '';
+  const max = clave === 'bajada' ? Math.max(1, ...v) * 1.1 : 100;
+  const pts = v.map((y, i) => [(i / (v.length - 1)) * 100, 48 - (y / max) * 46]);
+  const d = pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x},${y}`).join('');
+  return `<div class="d-grafica"><svg viewBox="0 0 100 50" preserveAspectRatio="none" aria-hidden="true"><path class="area" d="${d}L100,50L0,50Z"/><path d="${d}"/></svg></div>`;
+}
+
+function hermanos(p) {
+  const lista = nodoCol(p.c);
+  if (lista.length < 3 || p.c === 0) return '';
+  const max = Math.max(...lista.map((h) => h.valor || 0)) || 1;
+  const padre = p.c === 0 ? raiz : elegido(p.c - 1);
+  return `<div class="d-hermanos"><div class="d-tipo">Dentro de ${esc(padre.nombre)}</div>${lista.slice(0, 10).map((h) => `
+    <div class="${h === p.nodo ? 'yo' : ''}" style="--c:${h.color || 'var(--acento)'}"><span>${esc(h.nombre)}</span><i style="width:${Math.max(2, h.progreso != null ? h.progreso : (100 * (h.valor || 0)) / max)}%"></i><b>${esc(h.etiqueta ?? '')}</b></div>`).join('')}</div>`;
+}
+
+function pintarDetalle() {
+  const p = profundo();
+  const d = $('#detalle');
+  if (!p) { d.innerHTML = ''; return; }
+  const x = p.nodo;
+  const padre = p.c === 0 ? raiz : elegido(p.c - 1);
+  let cifra = x.etiqueta ?? '';
+  if (x.vivo && datosVivo) cifra = x.vivo === 'bajada' ? velocidad(datosVivo.ahora.bajada) : `${Math.round(datosVivo.ahora[x.vivo])} %`;
+  d.innerHTML = `
+    <div class="d-tipo">${esc(padre.nombre)}</div>
+    <h1 class="d-nombre">${esc(x.nombre)}</h1>
+    ${cifra ? `<div class="d-cifra">${esc(cifra)}</div>` : ''}
+    ${x.sub ? `<div class="d-sub">${esc(x.sub)}</div>` : ''}
+    ${x.progreso != null ? `<div class="d-barra" role="img" aria-label="${x.progreso} %"><i style="width:${x.progreso}%"></i></div>` : ''}
+    ${x.vivo ? grafica(x.vivo) : ''}
+    ${x.campos ? `<dl class="d-campos">${x.campos.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : ''}
+    ${x.texto ? `<div class="d-nota">${esc(x.texto)}</div>` : ''}
+    ${hermanos(p)}
+    ${x.hijos?.length && p.c < 2 ? `<div class="d-pie">→ para abrir sus ${x.hijos.length} elementos</div>` : ''}`;
+}
+
+function pintarRuta() {
+  const partes = [{ n: raiz.nombre, c: -1 }];
+  for (let c = 0; c < 3; c++) if (elegido(c)) partes.push({ n: elegido(c).nombre, c });
+  $('#ruta').innerHTML = partes.map((p, i) => `${i ? '<span class="sep">›</span>' : ''}<button data-ir="${p.c}">${esc(p.n)}</button>`).join('');
+}
+
+function pintar() {
+  for (let c = 0; c < 3; c++) pintarCol(c);
+  pintarDetalle();
+  pintarRuta();
+}
+
+function elegir(c, i) {
+  ruta[c] = i;
+  for (let k = c + 1; k < 3; k++) ruta[k] = -1;
+  activa = c;
+  pintar();
+}
+
+// ---------- teclado ----------
+addEventListener('keydown', (e) => {
+  if ((e.ctrlKey && e.key.toLowerCase() === 'k') || (e.key === '/' && document.activeElement !== $('#buscar'))) {
+    e.preventDefault(); $('#buscar').focus(); $('#buscar').select(); return;
+  }
+  if (document.activeElement === $('#buscar')) return;
+  const lista = nodoCol(activa);
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault();
+    const i = Math.max(0, Math.min(lista.length - 1, (ruta[activa] < 0 ? 0 : ruta[activa]) + (e.key === 'ArrowDown' ? 1 : -1)));
+    elegir(activa, i);
+  } else if ((e.key === 'ArrowRight' || e.key === 'Enter') && activa < 2 && elegido(activa)?.hijos?.length) {
+    e.preventDefault(); elegir(activa + 1, 0);
+  } else if ((e.key === 'ArrowLeft' || e.key === 'Escape' || e.key === 'Backspace') && activa > 0) {
+    e.preventDefault(); ruta[activa] = -1; activa--; pintar();
+  }
+});
+$('#navegador').addEventListener('click', (e) => {
+  const f = e.target.closest('.fila'); if (!f) return;
+  elegir(+f.dataset.c, +f.dataset.i);
+});
+$('#ruta').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-ir]'); if (!b) return;
+  const c = +b.dataset.ir;
+  for (let k = c + 1; k < 3; k++) ruta[k] = -1;
+  activa = Math.max(0, c);
+  pintar();
+});
+
+// ---------- Ir a… (busca en todo el árbol) ----------
+let todos = [];
+function indexar() {
+  todos = [];
+  raiz.hijos.forEach((a, i) => {
+    todos.push({ n: a, camino: [i], ruta: raiz.nombre });
+    (a.hijos || []).forEach((b, j) => {
+      todos.push({ n: b, camino: [i, j], ruta: a.nombre });
+      (b.hijos || []).forEach((c, k) => todos.push({ n: c, camino: [i, j, k], ruta: `${a.nombre} › ${b.nombre}` }));
+    });
+  });
+}
+const normal = (t) => String(t).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+let res = [];
+let resI = 0;
+function buscar() {
+  const q = normal($('#buscar').value.trim());
+  const caja = $('#resultados');
+  if (!q) { caja.hidden = true; return; }
+  const punt = (t) => { const n = normal(t.n.nombre); return n.startsWith(q) ? 0 : n.split(/[s·._-]+/).some((p) => p.startsWith(q)) ? 1 : n.includes(q) ? 2 : normal(t.n.sub || '').includes(q) ? 3 : 9; };
+  res = todos.map((t) => [punt(t), t]).filter(([p]) => p < 9).sort((a, b) => a[0] - b[0]).map(([, t]) => t).slice(0, 12);
+  resI = 0;
+  caja.hidden = false;
+  const marcar = (t) => { const i = normal(t).indexOf(q); return i < 0 ? esc(t) : `${esc(t.slice(0, i))}<mark>${esc(t.slice(i, i + q.length))}</mark>${esc(t.slice(i + q.length))}`; };
+  caja.innerHTML = res.length ? res.map((t, i) => `<div class="res${i === resI ? ' activo' : ''}" data-r="${i}" role="option"><span>${marcar(t.n.nombre)}</span><span class="r-val">${esc(t.n.etiqueta ?? '')}</span><span class="r-ruta">${esc(t.ruta)}</span></div>`).join('')
+    : '<div class="vacia">Nada con ese nombre.</div>';
+}
+function ir(t) {
+  ruta = [t.camino[0], t.camino[1] ?? -1, t.camino[2] ?? -1];
+  activa = t.camino.length - 1;
+  $('#buscar').value = ''; $('#resultados').hidden = true; $('#buscar').blur();
+  pintar();
+}
+$('#buscar').addEventListener('input', buscar);
+$('#buscar').addEventListener('keydown', (e) => {
+  const caja = $('#resultados');
+  if (e.key === 'Escape') { $('#buscar').value = ''; caja.hidden = true; $('#buscar').blur(); }
+  if (!res.length) return;
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault(); resI = (resI + (e.key === 'ArrowDown' ? 1 : -1) + res.length) % res.length;
+    caja.querySelectorAll('.res').forEach((r, i) => r.classList.toggle('activo', i === resI));
+  }
+  if (e.key === 'Enter') ir(res[resI]);
+});
+$('#resultados').addEventListener('mousedown', (e) => { const r = e.target.closest('[data-r]'); if (r) { e.preventDefault(); ir(res[+r.dataset.r]); } });
+
+// ---------- arranque ----------
+vivo((v) => {
+  datosVivo = v;
+  $('#e-cpu').textContent = `${Math.round(v.ahora.cpu ?? 0)} %`;
+  $('#e-ram').textContent = `${Math.round(v.ahora.ram ?? 0)} %`;
+  $('#e-red').textContent = velocidad(v.ahora.bajada);
+  const a = v.actividad;
+  $('#delante').innerHTML = a ? `Delante: <b style="font-family:inherit">${esc(a.app)}</b>${a.proyecto ? ` · ${esc(a.proyecto)}` : ''}` : 'Sin actividad';
+  if (raiz && profundo()?.nodo.vivo) pintarDetalle();
+});
+raiz = await cargarArbol();
+indexar();
+const [c0, c1, c2] = location.hash.slice(1).split('/').map(Number);
+if (c0 >= 0) { ruta = [c0, c1 >= 0 ? c1 : -1, c2 >= 0 ? c2 : -1]; activa = [c0, c1, c2].filter((x) => x >= 0).length - 1; }
+pintar();
+if (location.search.includes('buscar=')) { $('#buscar').value = new URLSearchParams(location.search).get('buscar'); buscar(); }
+</script>
+</body>
+</html>
